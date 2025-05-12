@@ -17,3 +17,4 @@ mdbook build
 mdbook serve
 ```
 
+You can see the compiled version of the tutorial [here](https://stela2502.github.io/mdbook_simulted_annealing_in_rust/).
