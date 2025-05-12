@@ -1,0 +1,9 @@
+[book]
+authors = ["Stefan Lang"]
+language = "en"
+src = "src"
+title = "Using rust to implement the simulated annealing algorithm"
+
+[preprocessor.katex]
+
+[preprocessor.compile-output]
