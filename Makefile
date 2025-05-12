@@ -17,6 +17,9 @@ $(STAGES):
 render_book:
 	mdbook build
 
+BRANCH := "gh-pages"
+REPO_URL := "git@github.com:stela2502/mdbook_simulted_annealing_in_rust.git"
+
 # Deploy to GitHub Pages
 deploy_book: render_book
 	@echo "Deploying to GitHub Pages..."
