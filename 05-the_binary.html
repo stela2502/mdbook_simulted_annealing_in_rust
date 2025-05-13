@@ -1,0 +1,476 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>The First Rust Binary - Using rust to implement the simulated annealing algorithm</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Using rust to implement the simulated annealing algorithm</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="rust-program-logioc-is-implemented-in-mainrs"><a class="header" href="#rust-program-logioc-is-implemented-in-mainrs">Rust Program Logioc is Implemented in "main.rs"</a></h1>
+<p>If you compile the library as it is you will not be able to use it.
+We need to implement the main.rs file that codes for the binary.</p>
+<p>The R version of what we implement here is this:</p>
+<pre><code class="language-r">
+ycc &lt;- read.delim("../Spellman_Yeast_Cell_Cycle.tsv",row.names=1,header=T,sep="\t")
+ycc &lt;- as.matrix(ycc)
+ycc.01 &lt;- t(apply(ycc,1,scale.01))
+
+
+
+
+system.time(proc.time(clus &lt;- sa.ok(ycc.01,10,25000,20,0.995)))
+
+# plot the clusters using base R
+par(mfrow=c(3,4))
+
+for(i in 1:max(clus)){
+  
+  ycc.c &lt;- ycc.01[which(clus==i),]
+  plot(ycc.c[1,],ty="l",ylim=range(ycc.c))
+  apply(ycc.c,1,lines)
+  
+}
+</code></pre>
+<p>But as we implement this functionality as executable it would be better to not hardcode the options:</p>
+<p>Command line options are normally parsed using the clap crate so we should add that to our project.
+This time I want a specific version:</p>
+<pre><code>cargo add clap@3.0.14 --features derive
+</code></pre>
+<p>We need to get the input table, the separating char for that table, the number of clusters to search for, the starting temperature, cool-down factor and max iterations to run through as well as the file we want to save the clusters to. In Rust you would do this like that:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use clap::Parser;
+
+#[derive(Parser)]
+#[clap(version = "1.0.0", author = "Stefan L. &lt;stefan.lang@med.lu.se&gt;")]
+struct Opts {
+    /// the input text table
+    #[clap(short, long)]
+    file: String,
+    /// the column separator for the file
+    #[clap(default_value= "\\t",short, long)]
+    sep: String,
+    /// the number of clusters
+    #[clap(short, long)]
+    clusters: usize,
+    /// the starting temperature
+    #[clap(default_value_t= 20.0,short, long)]
+    temp: f32,
+    /// the cooling factor
+    #[clap(default_value_t= 0.9995,short, long)]
+    cool: f32,
+    ///max number of iterations
+    #[clap(default_value_t= 1000*1000,short, long)]
+    max_it: usize,
+    /// the grouping outfile
+    #[clap(short, long)]
+    outfile: String,
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Here's a breakdown of what it's doing:</p>
+<ol>
+<li>
+<p><strong>use clap::Parser;:</strong> This imports the necessary functionality from the clap crate, which is used for parsing command-line arguments.</p>
+</li>
+<li>
+<p><strong>#[derive(Parser)]:</strong> This macro automatically implements the Parser trait for the Opts struct. This allows the struct to be used for argument parsing in the CLI.</p>
+</li>
+<li>
+<p><strong>#[clap(version = "1.0.0", author = "Stefan L. <a href="mailto:stefan.lang@med.lu.se">stefan.lang@med.lu.se</a>")]:</strong> This defines metadata for the program such as its version and author, which will be shown when the user runs the command with a --version or --help flag.</p>
+</li>
+<li>
+<p><strong>struct Opts { ... }:</strong> The Opts struct holds the various command-line arguments that the program will accept.
+Each three lines corresponds to a command-line argument with hep srting, options and variable definition.</p>
+</li>
+</ol>
+<p>The different clap options we are using here mean</p>
+<ul>
+<li><strong>short</strong> use the variable names first character for a short option like -f for file</li>
+<li><strong>long</strong> use the variable name as long option line --file for file</li>
+<li><strong>default_value</strong> the default String value if the user does not specify one</li>
+<li><strong>default_value_t</strong> used for default values that are not a String</li>
+</ul>
+<p>The main function is quite simple — half of it is just calculating the time taken for the program to execute. Give it a try!</p>
+<pre><pre class="playground"><code class="language-rust">use std::time::SystemTime;
+// this is specific for my package which I have called simulated_annealing_new as I had an other version, too.
+use simulated_annealing::SimulatedAnnealing;
+
+fn main() {
+    let now = SystemTime::now();
+    
+    let opts: Opts = Opts::parse();
+
+    let mut sep = '\t';
+    if &amp;opts.sep != "\\t"{
+        //println!("I set sep to {}", opts.sep );
+        sep = opts.sep.chars().next().unwrap(); 
+    }
+
+    let mut sim = SimulatedAnnealing::new( &amp;opts.file, opts.clusters, opts.temp, sep );
+    sim.scale_01();    
+
+    //println!("Initial state: {sim}");
+
+    let iterations = sim.run( opts.max_it, opts.cool );
+
+    let _= sim.plot( &amp;opts.outfile );
+
+    //println!("Final state {sim} in {iterations} iterations");
+
+    match sim.write_clusters( &amp;opts.outfile, sep ){
+        Ok(_) =&gt; println!("Clusters written to {}", &amp;opts.outfile ),
+        Err(e) =&gt; eprintln!("Failed to write the data to {}: {:?}", &amp;opts.outfile, e),
+    }
+    match now.elapsed() {
+        Ok(elapsed) =&gt; {
+            let hours = elapsed.as_secs() / 3600; // Calculate hours
+            let minutes = (elapsed.as_secs() % 3600) / 60; // Calculate minutes
+            let seconds = elapsed.as_secs() % 60; // Calculate remaining seconds
+            let milliseconds = elapsed.subsec_millis(); // Milliseconds
+            let microseconds = elapsed.subsec_micros(); // Microseconds (if needed)
+
+            eprintln!(
+                "finished in {} h {} min {} sec {} ms",
+                hours, minutes, seconds, milliseconds
+            );
+        },
+        Err(e) =&gt; {
+            println!("Error: {e:?}");
+        }
+    }
+}
+</code></pre></pre>
+<p>Now compile and test it:</p>
+<pre><code class="language-{bash}">cargo test -r
+</code></pre>
+<pre><code class="language-text">
+running 2 tests
+test tests::tes_scale01 ... ok
+test tests::test_read_data ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test test_simulated_annealing ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+</code></pre>
+<h2 id="we-have-an-executable"><a class="header" href="#we-have-an-executable">We have an Executable!!</a></h2>
+<p>You now can run the executable target/release/simulated_annealing like that:</p>
+<pre><code class="language-{bash}">target/release/simulated_annealing  -f tests/data/Spellman_Yeast_Cell_Cycle.tsv --clusters 8 --temp 20 --outfile /tmp/clusters.tsv --max-it 10000
+</code></pre>
+<pre><code class="language-text">
+Saved: /tmp/clusters.tsv_cluster_1.png
+Saved: /tmp/clusters.tsv_cluster_2.png
+Saved: /tmp/clusters.tsv_cluster_3.png
+Saved: /tmp/clusters.tsv_cluster_4.png
+Saved: /tmp/clusters.tsv_cluster_5.png
+Saved: /tmp/clusters.tsv_cluster_6.png
+Saved: /tmp/clusters.tsv_cluster_7.png
+Saved: /tmp/clusters.tsv_cluster_8.png
+Saved: /tmp/clusters.tsv_cluster_9.png
+Saved: /tmp/clusters.tsv_cluster_10.png
+Clusters written to /tmp/clusters.tsv
+finished in 0 h 0 min 0 sec 189 milli sec
+
+</code></pre>
+<h2 id="implement-a-print-for-our-class"><a class="header" href="#implement-a-print-for-our-class">Implement a 'print' for our Class</a></h2>
+<p>The output from our simulation is missing key information — we want to display the system's energy before and after processing.</p>
+<p>In an R S3 class, we would implement a custom print method like this:</p>
+<pre><code class="language-r">print.simulatedAnnealing &lt;- function(x) {
+  # Format and display info about x
+}
+</code></pre>
+<p>This allows you to simply call <code>print(x)</code> and get a meaningful summary of the object.</p>
+<p>Rust doesn't have classical inheritance like R's S3/S4 or R6 systems. Instead, Rust uses <strong>traits</strong>, which act like interfaces or capabilities. A type can implement a trait to gain specific behavior — similar to adding methods in R.</p>
+<p>To define a custom print format in Rust, we implement the <code>Display</code> trait:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fmt;
+
+impl fmt::Display for SimulatedAnnealing {
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter&lt;'_&gt;) -&gt; fmt::Result {
+        let mut sum = 0.0_f32;
+        for i in 0..self.k {
+            sum += self.calc_ek(i);
+        }
+        sum /= self.k as f32;
+        write!(
+            f,
+            "SimulatedAnnealing (temperature: {:.2}, total energy: {:.2} for {} clusters)",
+            self.temp, sum, self.k
+        )
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>This gives the struct a user-friendly string representation, just like implementing <code>print()</code> for a class in R.</p>
+<p>Afterwards we can change our main.rs and add the print statements:</p>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let now = SystemTime::now();
+    
+    let opts: Opts = Opts::parse();
+
+    let mut sep = '\t';
+    if &amp;opts.sep != "\\t"{
+        //println!("I set sep to {}", opts.sep );
+        sep = opts.sep.chars().next().unwrap(); 
+    }
+
+    let mut sim = SimulatedAnnealing::new( &amp;opts.file, opts.clusters, opts.temp, sep );
+    sim.scale_01();    
+
+    println!("Initial state: {sim}");
+
+    let iterations = sim.run( opts.max_it, opts.cool );
+
+    let _= sim.plot( &amp;opts.outfile );
+
+    println!("Final state after {iterations} iterations: {sim}");
+
+    match sim.write_clusters( &amp;opts.outfile, sep ){
+        Ok(_) =&gt; println!("Clusters written to {}", &amp;opts.outfile ),
+        Err(e) =&gt; eprintln!("Failed to write the data to {}: {:?}", &amp;opts.outfile, e),
+    }
+    match now.elapsed() {
+        Ok(elapsed) =&gt; {
+            let hours = elapsed.as_secs() / 3600; // Calculate hours
+            let minutes = (elapsed.as_secs() % 3600) / 60; // Calculate minutes
+            let seconds = elapsed.as_secs() % 60; // Calculate remaining seconds
+            let milliseconds = elapsed.subsec_millis(); // Milliseconds
+            let microseconds = elapsed.subsec_micros(); // Microseconds (if needed)
+    
+            eprintln!(
+                "finished in {} h {} min {} sec {} ms",
+                hours, minutes, seconds, milliseconds
+            );
+        },
+        Err(e) =&gt; {
+            println!("Error: {e:?}");
+        }
+    }
+}</code></pre></pre>
+<p>I have not modified my examples here - so this is something you can do all for yourself.
+If we have more time we could implement one more improvement to the library:</p>
+<p>Add a store variable into the class and populate it with the row to row distances after you have scaled the data.
+Then modify the calc_ek() function to use the values from the store and not calculate the distances every single time.
+This modification will of cause be more beneficial if you run more iterations. If you calculate $1e+6$ iterations
+you can get an additional 5x speed improvement by storing the euclidian distances as a Vec&lt;Vec<f32>&gt; again. If you use a single vector and an index function you could get an even better performance.</p>
+<h2 id="take-home-message"><a class="header" href="#take-home-message">Take Home Message</a></h2>
+<p>The implementation of the functions is significantly different from R or Python, but with the compiler and the AI assistance we can get at the moment it (2025), is doable. Coding in Rust takes time to get into, but the speed improvements can be worth it.</p>
+<p>This example here does not really highlight the usability as the R code also finished in a reasonable amount of time, but if you have more complicated tasks - like processing BAM files or anything else that is (1) either easy to implement in a multiprocessor system or (2) needs to process binary data, it is worth to look into Rust. It is somewhat slower than C and C++ (up to 5 times?), but Rust is so much easier to program in if you come from R and Python - it is worth it.</p>
+<p>By the way - I used a ArrayBase&lt;ndarray::OwnedRepr<f64>, Dim&lt;[usize; 2]&gt;&gt; for my store and gained another speed boost of factor 2. Given the fact that this takes either 60 or 30 milliseconds this is no big deal. For the sake of this tutorial I think a Vec&lt;Vec&lt;_&gt;&gt; is easier to work with. You can check out my other implementation <a href="https://github.com/stela2502/simulated_annealing">here</a>.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="04-SimulatedAnnealing.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="80-ErrorHandling.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="04-SimulatedAnnealing.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="80-ErrorHandling.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

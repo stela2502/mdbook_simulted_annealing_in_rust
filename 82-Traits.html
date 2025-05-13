@@ -1,0 +1,264 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Inheritance in Rust - Using rust to implement the simulated annealing algorithm</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Using rust to implement the simulated annealing algorithm</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="-intro-to-traits-in-rust-for-bioinformaticians"><a class="header" href="#-intro-to-traits-in-rust-for-bioinformaticians">🧬 Intro to Traits in Rust (For Bioinformaticians)</a></h1>
+<p>In Rust, traits are like interfaces in other languages — they define a shared set of behavior that different types can implement.</p>
+<p>Think of traits like protocols that say:</p>
+<pre><code>*“If you implement this trait, you must define how these functions behave.”*
+</code></pre>
+<p>This is especially powerful in bioinformatics where you may want to define a common interface for different types of genomic data, file formats, or processing strategies.</p>
+<p>For example, you might have different structs for processing a GTF or a BED file — but if they both implement a FeatureMatcher trait, you can treat them the same in generic code.</p>
+<h2 id="-trait-example"><a class="header" href="#-trait-example">🧪 Trait Example</a></h2>
+<p>Let's say we want to define a trait for something that can match a read to a gene feature:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span>
+<span class="boring">fn main() {
+</span>pub trait FeatureMatcher { 
+
+/// prepare the class for ordered process_feature calls
+fn init_search(&amp;self, chr: &amp;str, start: usize, iterator: &amp;mut ExonIterator) -&gt; Result&lt;(), QueryErrors&gt;; 
+
+/// implements a Class specific way to postprocess multiplets
+fn extract_gene_ids(&amp;self, read_result: &amp;Option&lt;Vec&lt;ReadResult&gt;&gt;, data: &amp;ReadData, mapping_info: &amp;mut MappingInfo) -&gt; Vec&lt;String&gt;; 
+
+/// the main function processing one (paired) BAM entry
+fn process_feature( &amp;self, data: &amp;(ReadData, Option&lt;ReadData&gt;), mutations: &amp;Option&lt;MutationProcessor&gt;, iterator: &amp;mut ExonIterator, exp_gex: &amp;mut SingleCellData, exp_idx: &amp;mut IndexedGenes, mut_gex: &amp;mut SingleCellData, mut_idx: &amp;mut IndexedGenes, mapping_info: &amp;mut MappingInfo, match_type: &amp;MatchType, ); 
+
+} 
+<span class="boring">}</span></code></pre></pre>
+<p>Now, any struct (like GTF or BedData) that implements FeatureMatcher can be used generically:</p>
+<pre><code> fn process_chunk&lt;T: FeatureMatcher + Sync + Send&gt;(...) { ... } 
+</code></pre>
+<p>This is powerful for writing reusable code — especially for large-scale pipelines, format conversions, or multimodal analysis tools.</p>
+<h3 id="-what-are-send-and-sync--and-why-do-we-need-them"><a class="header" href="#-what-are-send-and-sync--and-why-do-we-need-them">🧵 What Are <code>Send</code> and <code>Sync</code> — and Why Do We Need Them?</a></h3>
+<p>When writing parallel code in Rust — which is common in bioinformatics for speeding up large data analyses — the compiler needs to <strong>guarantee thread safety</strong>.</p>
+<p>Rust uses two special "auto traits" to track this:</p>
+<h4 id="-send"><a class="header" href="#-send">✅ <code>Send</code></a></h4>
+<p>A type is <code>Send</code> if it’s safe to <strong>move</strong> it to another thread.</p>
+<p>Think: <em>"Can I pass this thing into a thread and not worry about it blowing up?"</em></p>
+<h4 id="-sync"><a class="header" href="#-sync">✅ <code>Sync</code></a></h4>
+<p>A type is <code>Sync</code> if it’s safe to <strong>share a reference</strong> (<code>&amp;T</code>) between threads.</p>
+<p>Think: <em>"Can multiple threads safely read this at the same time?"</em></p>
+<hr />
+<h3 id="-why-it-matters-for-traits"><a class="header" href="#-why-it-matters-for-traits">🧪 Why It Matters for Traits</a></h3>
+<p>When we define a trait like <code>FeatureMatcher</code>, and we want to use it in multithreaded code (e.g., via <code>Arc&lt;dyn FeatureMatcher&gt;</code>), Rust needs to know:</p>
+<blockquote>
+<p>“Is this trait object safe to move or share between threads?”</p>
+</blockquote>
+<p>To answer that, we add these trait bounds:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait FeatureMatcher: Send + Sync {
+    ...
+}
+<span class="boring">}</span></code></pre></pre>
+<p>This ensures that any struct implementing <code>FeatureMatcher</code> is guaranteed to be thread-safe — making your code safer, faster, and more parallel-friendly by default.</p>
+<h2 id="-why-traits-matter-in-bioinformatics"><a class="header" href="#-why-traits-matter-in-bioinformatics">💡 Why Traits Matter in Bioinformatics</a></h2>
+<p><strong>Traits let you:</strong></p>
+<ul>
+<li>Design modular code where the implementation details are abstracted away</li>
+<li>Work with different formats using a unified API</li>
+<li>Enable parallelization safely with Sync + Send</li>
+<li>Write testable and flexible pipelines</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="81_testing.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="81_testing.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

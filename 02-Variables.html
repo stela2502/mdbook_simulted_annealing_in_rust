@@ -1,0 +1,350 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Variables - Using rust to implement the simulated annealing algorithm</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Using rust to implement the simulated annealing algorithm</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="variables---strict-types-and-ownership-in-rust"><a class="header" href="#variables---strict-types-and-ownership-in-rust">Variables - Strict Types and Ownership in Rust</a></h1>
+<h2 id="strict-types-in-rust"><a class="header" href="#strict-types-in-rust">Strict Types in Rust</a></h2>
+<p>Rust is a statically typed language, meaning you <strong>must define the types</strong> of variables and data structures explicitly. This ensures <strong>type safety</strong> at <strong>compile time</strong>.</p>
+<h3 id="example-1-strict-typing-in-rust"><a class="header" href="#example-1-strict-typing-in-rust">Example 1: Strict Typing in Rust</a></h3>
+<p>Let's start by defining variables with specific types:</p>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let integer: i32 = 10;  // 32-bit signed integer
+    let floating_point: f64 = 10.5;  // 64-bit floating-point number
+    let boolean: bool = true;  // Boolean value
+
+    println!("Integer: {}, Floating-point: {}, Boolean: {}", integer, floating_point, boolean);
+}</code></pre></pre>
+<p>This does work as expected, but what happens if we set the boolean to 1 instead?</p>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let integer: i32 = 10;  // 32-bit signed integer
+    let floating_point: f64 = 10.5;  // 64-bit floating-point number
+    let boolean: bool = 1;  // Boolean value
+
+    println!("Integer: {}, Floating-point: {}, Boolean: {}", integer, floating_point, boolean);
+}</code></pre></pre>
+<h4 id="what-happens-here"><a class="header" href="#what-happens-here">What happens here?</a></h4>
+<ul>
+<li>Rust expects each variable to be of the specified type (<code>i32</code>, <code>f64</code>, <code>bool</code>).</li>
+<li>If you try to assign a value with an incompatible type (e.g., <code>1</code> to an <code>bool</code>), the <strong>compiler will throw an error</strong>.</li>
+</ul>
+<pre><code>error[E0308]: mismatched types
+ --&gt; src\main.rs:8:9
+  |
+4 |     let boolean: bool = 1;
+  |         ^^^^^^^^^^^^^^ expected 'bool', found floating-point number
+</code></pre>
+<p>This strict checking ensures type safety and helps avoid runtime errors related to type mismatches.</p>
+<h4 id="key-points"><a class="header" href="#key-points">Key Points:</a></h4>
+<ul>
+<li><strong>Rust enforces type correctness at compile time</strong>. You <strong>cannot implicitly convert between types</strong> (like R or Python might allow).</li>
+<li><strong>Explicit type annotations</strong> help prevent unintended errors and increase code clarity.</li>
+</ul>
+<hr />
+<h2 id="ownership-in-rust"><a class="header" href="#ownership-in-rust">Ownership in Rust</a></h2>
+<p>One of Rust's most important and unique features is its <strong>ownership model</strong>. It ensures <strong>memory safety</strong> by enforcing strict rules about <strong>who owns data</strong> and when data is <strong>dropped (freed)</strong>.</p>
+<h3 id="ownership-rules-in-rust"><a class="header" href="#ownership-rules-in-rust">Ownership Rules in Rust:</a></h3>
+<ol>
+<li><strong>Each value in Rust has a single owner</strong>.</li>
+<li><strong>When the owner goes out of scope</strong>, Rust <strong>automatically frees the memory</strong>.</li>
+<li><strong>You cannot have more than one owner</strong> at a time. If you want to <strong>transfer ownership</strong>, you use <strong>borrowing</strong> or <strong>cloning</strong>.</li>
+</ol>
+<h3 id="example-2-ownership-in-rust"><a class="header" href="#example-2-ownership-in-rust">Example 2: Ownership in Rust</a></h3>
+<p>Let's look at a simple example that demonstrates ownership.</p>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let s1 = String::from("Hello, Rust!");  // s1 owns the String
+
+    let s2 = s1;  // Ownership of the String is moved from s1 to s2
+    println!("{}", s2);  // This works, since s2 is the owner now
+
+    // After s2 goes out of scope, the memory will be freed.
+}</code></pre></pre>
+<p>This version simply prints the values from s2 - but would s1 still be usable?</p>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let s1 = String::from("Hello, Rust!");  // s1 owns the String
+
+    let s2 = s1;  // Ownership of the String is moved from s1 to s2
+    println!("{}", s1);  // This works, since s2 is the owner now
+
+    // After s2 goes out of scope, the memory will be freed.
+}</code></pre></pre>
+<p>let s2 = s1.clone();  // Ownership of the String is moved from s1 to s2
+|</p>
+<h4 id="explanation"><a class="header" href="#explanation">Explanation:</a></h4>
+<ul>
+<li><code>s1</code> is the <strong>owner</strong> of the <code>String</code> object.</li>
+<li>When <code>s1</code> is assigned to <code>s2</code>, <strong>ownership</strong> of the <code>String</code> is <strong>moved</strong> from <code>s1</code> to <code>s2</code>.</li>
+<li>After the move, <code>s1</code> is no longer valid, and trying to use it (e.g., <code>println!("{}", s1)</code>) will result in a <strong>compiler error</strong>:
+<pre><code>error[E0382]: use of moved value: `s1`
+ --&gt; src\main.rs:7:22
+  |
+7 |     println!("{}", s1);  // ERROR: value moved, cannot use
+  |                      ^^^ value moved here
+</code></pre>
+</li>
+</ul>
+<p>This behavior is critical because it ensures that <strong>Rust doesn’t accidentally create multiple owners</strong> of the same data (which could lead to <strong>data races or memory leaks</strong>).</p>
+<p>And you also see that the Rust compiler directly tries to give you a hint in how to circumvent this problem:</p>
+<pre><code>help: consider cloning the value if the performance cost is acceptable
+  |
+4 |   let s2 = s1.clone();  // Ownership of the String is moved from s1 to s2
+  |     
+</code></pre>
+<h3 id="example-3-borrowing-in-rust"><a class="header" href="#example-3-borrowing-in-rust">Example 3: Borrowing in Rust</a></h3>
+<p>Rust allows you to <strong>borrow</strong> data, either immutably or mutably.</p>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let s1 = String::from("Hello, Rust!");  // s1 owns the String
+
+    // Immutable Borrowing
+    let s2 = &amp;s1;  // s2 borrows s1 immutably
+    println!("{}", s2);  // This works because s2 is just borrowing s1
+
+    // Mutable Borrowing
+    let mut s3 = String::from("Mutable borrow!");
+    let s4 = &amp;mut s3;  // s4 borrows s3 mutably
+    s4.push_str(" Now it’s mutable!");
+    println!("{}", s4);  // Prints: Mutable borrow! Now it’s mutable!
+    
+    // You can't have both mutable and immutable borrows at the same time:
+    let s5 = &amp;s1;  // ERROR: cannot borrow `s1` as immutable because it's already borrowed as mutable
+}</code></pre></pre>
+<h4 id="explanation-1"><a class="header" href="#explanation-1">Explanation:</a></h4>
+<ul>
+<li><strong>Immutable borrowing</strong> (<code>let s2 = &amp;s1</code>) allows multiple references to the same data but <strong>doesn’t allow modification</strong>.</li>
+<li><strong>Mutable borrowing</strong> (<code>let s4 = &amp;mut s3</code>) gives exclusive access to the data, and <strong>no other borrows</strong> (immutable or mutable) can exist while it’s borrowed mutably.</li>
+<li>The rules prevent <strong>data races</strong> by ensuring no one can have mutable access while others are reading (or mutably accessing the data).</li>
+</ul>
+<hr />
+<h2 id="combining-types-and-ownership"><a class="header" href="#combining-types-and-ownership">Combining Types and Ownership</a></h2>
+<p>Let's combine both <strong>strict typing</strong> and <strong>ownership</strong> in a small example where we use both concepts together.</p>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let num: i32 = 42;  // i32 type (strict typing)
+    let num_copy = num;  // Ownership of num is copied to num_copy (as num is Copy type)
+
+    println!("num: {}, num_copy: {}", num, num_copy);  // Both can still be used
+
+    let s1 = String::from("Rust Ownership!");  // String type (non-Copy type)
+    let s2 = s1;  // Ownership of s1 is moved to s2
+    // println!("{}", s1);  // ERROR: s1 is no longer valid
+    println!("{}", s2);  // This works, since s2 now owns the String
+}</code></pre></pre>
+<h3 id="output"><a class="header" href="#output">Output:</a></h3>
+<pre><code>num: 42, num_copy: 42
+Rust Ownership!
+</code></pre>
+<ul>
+<li><strong>Copy types</strong> (like <code>i32</code>) do not move ownership. They <strong>duplicate the data</strong> when assigned to another variable.</li>
+<li><strong>Non-copy types</strong> (like <code>String</code>) <strong>move ownership</strong> when assigned to another variable, which makes the first variable invalid.</li>
+</ul>
+<hr />
+<h2 id="summary-of-ownership-and-strict-types"><a class="header" href="#summary-of-ownership-and-strict-types">Summary of Ownership and Strict Types:</a></h2>
+<ul>
+<li><strong>Rust’s strict typing</strong> ensures type safety at compile time, preventing mismatched types and logic errors that would only be caught at runtime in languages like R or Python.</li>
+<li><strong>Rust’s ownership model</strong> prevents issues like double freeing of memory and data races, making it one of the <strong>safest systems languages</strong> available. The rules around ownership, borrowing, and moving data are <strong>central to memory management</strong> in Rust, giving developers fine-grained control over memory safety without a garbage collector.</li>
+</ul>
+<p>Even so will not face these problems today it's extremely important to know about this before you try to program in Rust.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="01-intro.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="03-read_data.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="01-intro.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="03-read_data.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

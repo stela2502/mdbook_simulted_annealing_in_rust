@@ -1,0 +1,614 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>The Simulated Annealing Algorithm - Using rust to implement the simulated annealing algorithm</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Using rust to implement the simulated annealing algorithm</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="implement-the-simulated-annealing-algorithm"><a class="header" href="#implement-the-simulated-annealing-algorithm">Implement the Simulated Annealing Algorithm</a></h1>
+<p>The idea behind this workshop is not to teach you how to implement the simulated annealing algorithm, but to show you how you can start to use Rust.
+Therefore we will use Shamit's R implementation and convert that to Rust.</p>
+<h2 id="scaling-of-the-data-or-why-scale01-in-r-is-fundamentally-flawed"><a class="header" href="#scaling-of-the-data-or-why-scale01-in-r-is-fundamentally-flawed">scaling of the data or "why <code>scale.01</code> in R is Fundamentally Flawed"</a></h2>
+<h3 id="the-r-implementation"><a class="header" href="#the-r-implementation">The R Implementation</a></h3>
+<p>The scale.01 function in R is defined as follows:</p>
+<pre><code class="language-r">scale.01 &lt;- function(v){
+  sc.01 &lt;- (v - min(v)) / (max(v) - min(v))
+  sc.01
+}
+</code></pre>
+<p>At first glance, this function seems to be a simple and effective way to scale a vector of numerical values between 0 and 1. And <strong>to state that clearly - it is perfectly valid R code</strong>. However, there are several fundamental issues with this implementation.</p>
+<h3 id="the-problems-with-scale01"><a class="header" href="#the-problems-with-scale01">The Problems with scale.01</a></h3>
+<ol>
+<li>
+<p><strong>Inefficiency:</strong> The function computes min(v) and max(v) twice. This is unnecessary and can significantly slow down performance when applied to large vectors.</p>
+</li>
+<li>
+<p><strong>Vectorized but Inefficient in Apply Calls:</strong> The function is designed to be used in an apply() statement, which is idiomatic in R. However, repeatedly calling this function on subsets of data results in redundant computations.</p>
+</li>
+<li>
+<p><strong>Mutation vs. Copying:</strong> In R, this function creates a new vector instead of modifying the existing one in place. This is inefficient for large datasets and contrasts with best practices in languages like Rust.</p>
+</li>
+</ol>
+<h2 id="the-rust-approach"><a class="header" href="#the-rust-approach">The Rust Approach</a></h2>
+<p>In Rust, the equivalent function would modify the existing data structure in place for efficiency. Here’s an example:</p>
+<pre><pre class="playground"><code class="language-rust no_run"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn scale_01(&amp;mut self) {
+    for row in &amp;mut self.data {
+        let mut min = f32::INFINITY;
+        let mut range = f32::NEG_INFINITY;
+        
+        for &amp;value in row.iter() {
+            min = min.min(value);
+            range = range.max(value);
+        }
+        range -= min;
+        for value in row.iter_mut() {
+            *value = (*value - min) / range;
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="why-the-rust-approach-is-better"><a class="header" href="#why-the-rust-approach-is-better">Why the Rust Approach is Better</a></h3>
+<ol>
+<li>
+<p><strong>In-Place Modification:</strong> The Rust function modifies the existing data structure instead of creating unnecessary copies.</p>
+</li>
+<li>
+<p><strong>Optimized Min/Max Computation:</strong> The min and max values are computed only once per row, avoiding redundant calculations.</p>
+</li>
+<li>
+<p><strong>Memory Efficiency:</strong> By avoiding extra allocations, the Rust implementation is more memory-efficient, making it suitable for large datasets.</p>
+</li>
+<li>
+<p><strong>Safety &amp; Performance:</strong> Rust enforces strict memory safety and avoids unintended data duplication, unlike R, where copies can be created implicitly.</p>
+</li>
+</ol>
+<h3 id="summary"><a class="header" href="#summary">Summary</a></h3>
+<ul>
+<li>R makes vectorized operations look simple but hides inefficiencies.</li>
+<li>Rust requires explicit memory management but ensures better performance and correctness.</li>
+</ul>
+<h2 id="calculating-cluster-energy"><a class="header" href="#calculating-cluster-energy">Calculating Cluster Energy</a></h2>
+<p>The R function <code>calc.Ek</code> calculates the energy of a specific cluster in a dataset. Here's the R code:</p>
+<pre><code class="language-r">calc.Ek &lt;- function(m, clus, coi){
+  clus.d &lt;- m[which(clus == coi), ]
+  Ek &lt;- sum(dist(clus.d))
+  Ek
+}
+</code></pre>
+<h3 id="explanation-of-the-r-code"><a class="header" href="#explanation-of-the-r-code">Explanation of the R Code</a></h3>
+<ol>
+<li>
+<p><strong>Selecting Rows for the Cluster</strong>:<br />
+The first step in the R function is to create a new matrix, <code>clus.d</code>, that contains only the rows of the matrix <code>m</code> where the cluster label in the <code>clus</code> vector is equal to the cluster of interest <code>coi</code>. This is done using the <code>which()</code> function to find the indices of the rows that belong to the target cluster.</p>
+</li>
+<li>
+<p><strong>Calculating the Energy</strong>:<br />
+The function then calculates the energy (<code>Ek</code>) of the cluster by summing the pairwise Euclidean distances between all the rows in <code>clus.d</code>. The <code>dist()</code> function in R calculates the Euclidean distance between each pair of rows, and <code>sum()</code> is used to add these distances together.</p>
+</li>
+<li>
+<p><strong>Output</strong>:<br />
+The energy of the cluster (<code>Ek</code>) is returned as the result.</p>
+</li>
+</ol>
+<h3 id="how-it-works-in-r"><a class="header" href="#how-it-works-in-r">How It Works in R</a></h3>
+<ul>
+<li>R makes use of high-level functions like <code>which()</code> and <code>dist()</code>, which simplify the implementation but may introduce some overhead due to the creation of intermediate data structures.</li>
+</ul>
+<h2 id="the-rust-implementation"><a class="header" href="#the-rust-implementation">The Rust Implementation</a></h2>
+<p>The equivalent function in Rust is implemented with more explicit control over memory and data. Here's the Rust code:</p>
+<pre><pre class="playground"><code class="language-rust no_run"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>/// Function to compute the Euclidean distance between rows of data
+fn euclidean_distance(&amp;self, i: usize, j: usize) -&gt; f32 {
+    let v1 = &amp;self.data[i];
+    let v2 = &amp;self.data[j];
+    let mut sum: f32 = 0.0;
+    for i in 0..v1.len() {
+        sum += (v1[i] - v2[i]).powi(2);
+    }
+    sum.sqrt()
+}
+
+/// Calculates the cluster energy
+fn calc_ek(&amp;self, clus: usize) -&gt; f32 {
+    let ids = self.cluster_rows(clus);
+    let mut sum = 0.0;
+    for i in 0..ids.len() {
+        for j in i+1..ids.len() {
+            sum += self.euclidean_distance(ids[i], ids[j]);
+        }
+    }
+    sum
+}
+
+/// Which rows are in cluster `clus`?
+fn cluster_rows(&amp;self, clus: usize) -&gt; Vec&lt;usize&gt; {
+    let mut ret = Vec::&lt;usize&gt;::with_capacity(self.clusters.len());
+    for i in 0..self.clusters.len() {
+        if self.clusters[i] == clus {
+            ret.push(i);
+        }
+    }
+    ret
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="explanation-of-the-rust-code"><a class="header" href="#explanation-of-the-rust-code">Explanation of the Rust Code</a></h3>
+<ol>
+<li>
+<p><strong>Euclidean Distance Calculation</strong>:<br />
+In Rust, the <code>euclidean_distance</code> function calculates the Euclidean distance between two rows. It takes the indices of the rows (<code>i</code> and <code>j</code>) and computes the sum of squared differences between corresponding elements in the rows. Finally, it returns the square root of the sum to get the distance.</p>
+</li>
+<li>
+<p><strong>Cluster Energy Calculation</strong>:<br />
+The <code>calc_ek</code> function calculates the energy of a cluster by:</p>
+<ul>
+<li>Finding the indices of the rows that belong to the specified cluster using the <code>cluster_rows</code> function.</li>
+<li>For each pair of rows in the cluster, it computes the Euclidean distance and adds it to the total sum, which represents the cluster energy.</li>
+</ul>
+</li>
+<li>
+<p><strong>Cluster Rows</strong>:<br />
+The <code>cluster_rows</code> function simply iterates over the <code>clusters</code> vector and collects the indices of the rows that belong to the specified cluster (<code>clus</code>). It returns a <code>Vec&lt;usize&gt;</code> containing these indices.</p>
+</li>
+</ol>
+<h3 id="how-it-works-in-rust"><a class="header" href="#how-it-works-in-rust">How It Works in Rust</a></h3>
+<ul>
+<li>Rust gives you more control over memory and data access. The program works with mutable references and does not create intermediate data structures unless necessary.</li>
+<li>The <code>cluster_rows</code> function is used to filter the rows based on the cluster, while the <code>euclidean_distance</code> function calculates the pairwise distance.</li>
+</ul>
+<p>That said, there are libraries that make Rust code look more like R, but I want to use as few libraries as possible here.</p>
+<hr />
+<h2 id="the-main-worker-function"><a class="header" href="#the-main-worker-function">The main worker function</a></h2>
+<p>The R code provided implements the simulated annealing algorithm in the following steps:</p>
+<ol>
+<li><strong>Initial Cluster Assignment</strong>: A random assignment of K clusters to the rows of data is performed using <code>sample(1:K, nrow(data), replace = TRUE)</code>.</li>
+<li><strong>Energy Calculation</strong>: The function <code>calc.Ek()</code> calculates the energy of the cluster (the sum of distances between elements within the cluster).</li>
+<li><strong>Annealing Process</strong>: In each iteration, a row (data point) is randomly chosen and moved to a new cluster. The energy of the system is recalculated based on the new cluster assignment.</li>
+<li><strong>Acceptance Criteria</strong>: If the new configuration has a lower energy, it is accepted. If the energy is higher, the new configuration is accepted based on a probabilistic criterion derived from the temperature (simulating the annealing process).</li>
+<li><strong>Cooling</strong>: The temperature is updated in each iteration by multiplying it with a cooling factor.</li>
+</ol>
+<pre><code class="language-r">#This is the main algorithm that performs the annealing. It takes the data,how
+#many K we are looking for, The number of iterations to perform, starting
+#temperature and the cooling factor.
+
+sa.ok &lt;- function(data,K,Iter,Temp,cool){
+
+  clusters &lt;- sample(1:K,nrow(data),replace = T) #initialise random clusters
+  
+  #clusters.o &lt;- clusters
+  
+  Es.old &lt;- calc.E.all(data,clusters)
+  #E.old &lt;- E.tot(Es.old)
+ 
+  for(i in 1:Iter){   # start iterating 
+    
+    clusters.new &lt;- clusters #copy the clusters
+    #Es.new &lt;- Es.old
+    
+    row.id &lt;- sample(1:nrow(data),1) #pick a gene at random
+    
+    from.c &lt;- clusters.new[row.id] # get the cluster it's moving from
+    #to.c &lt;- sample((1:K)[!(1:K) %in% from.c],1)
+    to.c &lt;- sample((1:K)[-from.c],1) # randomly choose a new cluster
+    
+    clusters.new[row.id] &lt;-  to.c # replace the old cluster with the new
+    
+    Es.new &lt;- Es.old #make a copy of the energies vector
+    # calc the energies of the two changed clusters
+    Es.new[from.c] &lt;- calc.Ek(data,clusters.new,from.c) 
+    Es.new[to.c] &lt;- calc.Ek(data,clusters.new,to.c)
+    
+    E.new &lt;- E.tot(Es.new) # calculate the new average E
+    E.old &lt;- E.tot(Es.old) # calculate the old average E
+    
+    if(E.new &lt; E.old){  # if new &lt; old accept the move copy the new clusters into the previous
+      clusters &lt;-  clusters.new #copy the new clusters into the previous
+      Es.old &lt;- Es.new # make Enew to Eold
+    }else{
+      
+      if(calc.exp(E.new,E.old,Temp) &gt; runif(1)){ #evaluate the exprssion against the random number from runif(1)
+        clusters &lt;- clusters.new #copy the new clusters into the previous
+        Es.old &lt;- Es.new  # make Enew to Eold
+      }
+    }
+    
+    {cat("\r",E.old)} #print out the energy to the screen
+    
+    Temp &lt;- Temp*cool # cool the system
+  }
+  clusters # return the clusters
+}
+</code></pre>
+<h3 id="rust-implementation"><a class="header" href="#rust-implementation">Rust Implementation</a></h3>
+<p>The Rust version of the algorithm closely follows the same logic as the R implementation but is adapted for performance and memory safety in the Rust programming language:</p>
+<ol>
+<li><strong>Random Cluster Assignment</strong>: In Rust, clusters are assigned using <code>rand::random_range()</code> instead of the R <code>sample()</code> function.</li>
+<li><strong>Energy Calculation</strong>: The energy calculation (<code>calc_ek()</code>) is similar to R’s <code>calc.Ek()</code>, but it uses a more efficient loop-based calculation of Euclidean distances.</li>
+<li><strong>Annealing Process</strong>: The process for updating the cluster assignment and calculating energies is similar to the R version but is implemented with Rust’s ownership model and safety guarantees.</li>
+<li><strong>Acceptance Criteria</strong>: The acceptance criterion is implemented with the same logic, but uses Rust’s <code>f32::exp()</code> to handle the energy calculations and probabilistic decision-making.</li>
+<li><strong>Cooling</strong>: The temperature is updated similarly to R, using a multiplicative cooling factor.</li>
+</ol>
+<pre><pre class="playground"><code class="language-rust no_run"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>    pub fn run( &amp;mut self, max_iter:usize, cool:f32 ) -&gt; usize {
+    
+      let mut it = 0;
+      // calculate the inital energies - this will be modified later
+      let mut old_energies= Vec::&lt;f32&gt;::with_capacity( self.k );
+      for i in 0..self.k {
+          old_energies.push( self.calc_ek( i ) );
+      }
+      
+      let mut old_total: f32 = old_energies.iter().sum::&lt;f32&gt;() / self.k as f32;
+      
+      let mut rand = rand::rng();
+      
+      for _ in 0..max_iter{
+          it += 1;
+          // initate all varaibales
+          let mut new_energies = old_energies.clone();
+          let moving_row = rand.random_range(0..self.data.len());
+          let move_from = self.clusters[moving_row];
+          let mut move_to = rand.random_range(0..self.k);
+          while move_from == move_to{
+              move_to = rand.random_range(0..self.k);
+          }
+          // move the row from to
+          self.clusters[moving_row] = move_to;
+          // calculate the new energies
+          new_energies[move_from] = self.calc_ek( move_from );
+          new_energies[move_to] = self.calc_ek( move_to );
+          
+          let new_total:u32 = new_energies.iter().sum::&lt;f32&gt;() / self.k as f32;
+          
+          if new_total &lt; old_total || 
+            (-((new_total - old_total) / self.temp)).exp() &gt; rand.random_range(0.0..1.0){
+              // that is a good one - keep this
+              old_energies[move_from] = new_energies[move_from];
+              old_energies[move_to] = new_energies[move_to];
+              old_total = new_total;
+          }else {
+              //this move was not good - drop it!
+              self.clusters[moving_row] = move_from;
+          }
+          // cool the system
+          self.temp *= cool;
+      }
+      it
+    }
+    
+<span class="boring">}</span></code></pre></pre>
+<p>There is not a lot of differences in the implementation - the rust code is even one line shorter than the R one.</p>
+<h2 id="and-funtions-to-plot-and-write-the-data"><a class="header" href="#and-funtions-to-plot-and-write-the-data">And Funtions to Plot and Write the Data</a></h2>
+<p>I assume that by now you understand what the write_clusters function is doing.</p>
+<p>Plotting is a lot different from R; I have just obtained that function structure from ChatGPT and fixed some errors.
+Just take it as is.</p>
+<pre><pre class="playground"><code class="language-rust no_run"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use plotters::prelude::*;
+use std::error::Error;
+use std::io::Write;
+
+    pub fn write_clusters(&amp;self, ofile: &amp;str, sep: char) -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
+        // Open the file in write mode
+        let mut file = File::create(ofile)?;
+
+        // Write the header (optional)
+        writeln!(file, "Rowname{}Cluster", sep)?;
+
+        // Iterate over the rownames and clusters, writing them to the file
+        for (rowname, cluster) in self.rownames.iter().zip(self.clusters.iter()) {
+            writeln!(file, "{}{}{}", rowname, sep, cluster+1)?;
+        }
+
+        Ok(())
+    }
+    
+    pub fn plot(&amp;self, prefix:&amp;str )-&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+        let output_dir = Path::new(prefix).parent().unwrap_or_else(|| Path::new("."));
+        std::fs::create_dir_all(output_dir)?;
+
+        for cluster_id in 0..self.k {
+            let filename = format!("{}_cluster_{}.png", prefix, cluster_id +1 );
+            let root = BitMapBackend::new(&amp;filename, (800, 600)).into_drawing_area();
+            root.fill(&amp;WHITE)?;
+
+            let mut chart = ChartBuilder::on(&amp;root)
+                .caption(format!("Cluster {}", cluster_id+1), ("sans-serif", 20))
+                .margin(20)
+                .x_label_area_size(40)
+                .y_label_area_size(40)
+                .build_cartesian_2d(0..self.data[0].len(), 0.0f32..1.0)?; // Adjust Y range if needed
+
+            chart.configure_mesh().draw()?;
+
+            // Collect all rows belonging to this cluster
+            let cluster_data: Vec&lt;&amp;Vec&lt;f32&gt;&gt; = self.data.iter()
+                .zip(&amp;self.clusters)
+                .filter(|&amp;(_, &amp;c)| c == cluster_id)
+                .map(|(row, _)| row)
+                .collect();
+
+            // Draw each row as a line plot
+            for row in cluster_data {
+                chart.draw_series(LineSeries::new(
+                    row.iter().enumerate().map(|(x, &amp;y)| (x, y)),
+                    &amp;BLUE,
+                ))?;
+            }
+
+            root.present()?;
+            println!("Saved: {}", filename);
+        }
+
+        Ok(())
+    }
+
+<span class="boring">}</span></code></pre></pre>
+<p>The plot function needs one more library:</p>
+<pre><code>cargo add plotters
+</code></pre>
+<p>If all has gone well we could improve on our tests!
+Add a second test case into the lib.rs file:</p>
+<pre><pre class="playground"><code class="language-rust no_run"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>    #[test]
+    fn tes_scale01(){
+        let mut obj = SimulatedAnnealing::new( "tests/data/Spellman_Yeast_Cell_Cycle.tsv", 8, 1000.0, '\t' );
+        obj.scale_01();
+        let exp5:Vec&lt;f32&gt; = vec![0.6989,0.0000,0.0968,0.3333,0.4301,1.0000,0.7419,0.7419,0.6022,0.7634,0.1720,0.4301,0.5161,0.7634,0.6989,0.6559];
+        let exp7:Vec&lt;f32&gt; = vec![0.0803,0.0000,0.2867,0.5849,0.9679,1.0000,0.7775,0.7156,0.5505,0.5459,0.4518,0.6193,0.8440,0.8532,0.9335,0.7752];
+        let mut dist: f32 = 0.0;
+        for i in 0..exp5.len() {
+            assert!(
+                (obj.data[5][i] - exp5[i]).abs() &lt; 1e-4,
+                "Mismatch in gene 5 at index {}: got {}, expected {}",
+                i, obj.data[5][i], exp5[i]
+            );
+            assert!(
+                (obj.data[7][i] - exp7[i]).abs() &lt; 1e-4,
+                "Mismatch in gene 7 at index {}: got {}, expected {}",
+                i, obj.data[7][i], exp7[i]
+            );
+            dist += (obj.data[7][i]-obj.data[5][i]).powi(2);
+        }
+        dist = dist.sqrt();
+        obj.clusters[5] = 8;
+        obj.clusters[7] = 8;
+        obj.k =9;
+        assert_eq!( obj.calc_ek(8), dist, "the distance in cluster 8 (genes 5 and 7)" );
+    }
+<span class="boring">}</span></code></pre></pre>
+<pre><code class="language-{bash eval=FALSE}">make test -r
+</code></pre>
+<pre><code class="language-text">
+running 2 tests
+test tests::tes_scale01 ... ok
+test tests::test_read_data ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test test_simulated_annealing ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+</code></pre>
+<p>This looks good, just that we can not use this library as we have not implemented the executable :-D</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="03-read_data.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="05-the_binary.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="03-read_data.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="05-the_binary.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

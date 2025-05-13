@@ -1,0 +1,363 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Error Handling in Rust - Using rust to implement the simulated annealing algorithm</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Using rust to implement the simulated annealing algorithm</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="error-handling"><a class="header" href="#error-handling">Error Handling in Rust</a></h1>
+<p>Rust provides a powerful error-handling system that helps ensure robustness and reliability. There are two main types of errors:</p>
+<h2 id="1-unrecoverable-errors-panic"><a class="header" href="#1-unrecoverable-errors-panic">1. Unrecoverable Errors (<code>panic!</code>)</a></h2>
+<p>Unrecoverable errors occur when the program reaches an unexpected state and must terminate immediately. Rust handles these with <code>panic!()</code>.</p>
+<h3 id="example"><a class="header" href="#example">Example:</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    panic!("Something went wrong!");
+}</code></pre></pre>
+<h3 id="when-to-use-panic"><a class="header" href="#when-to-use-panic">When to Use <code>panic!()</code></a></h3>
+<ul>
+<li><strong>Critical failure</strong> where recovery is impossible.</li>
+<li><strong>Development &amp; debugging</strong> to catch issues early.</li>
+<li><strong>Assertions</strong> in tests using <code>assert!()</code> or <code>assert_eq!()</code>.</li>
+</ul>
+<h3 id="handling-panics-gracefully"><a class="header" href="#handling-panics-gracefully">Handling Panics Gracefully</a></h3>
+<p>Instead of crashing the whole program, you can use <code>std::panic::catch_unwind()</code> to handle a panic in certain cases:</p>
+<pre><pre class="playground"><code class="language-rust">use std::panic;
+
+fn main() {
+    let result = panic::catch_unwind(|| {
+        panic!("This will be caught");
+    });
+    
+    if result.is_err() {
+        println!("A panic occurred, but the program is still running.");
+    }
+}</code></pre></pre>
+<h2 id="2-recoverable-errors-resultt-e"><a class="header" href="#2-recoverable-errors-resultt-e">2. Recoverable Errors (<code>Result&lt;T, E&gt;</code>)</a></h2>
+<p>Recoverable errors occur when an operation might fail but doesn't necessarily require termination. Rust uses the <code>Result&lt;T, E&gt;</code> type for these cases.</p>
+<h3 id="example-1"><a class="header" href="#example-1">Example:</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::fs::File;
+use std::io::Error;
+
+fn main() -&gt; Result&lt;(), Error&gt; {
+    let file = File::open("config.txt")?; // If error, return it
+    Ok(())
+}</code></pre></pre>
+<h3 id="resultt-e-explanation"><a class="header" href="#resultt-e-explanation"><code>Result&lt;T, E&gt;</code> Explanation</a></h3>
+<ul>
+<li><code>Ok(T)</code>: The operation was successful and returns <code>T</code>.</li>
+<li><code>Err(E)</code>: The operation failed and returns an error <code>E</code>.</li>
+</ul>
+<h3 id="common-ways-to-handle-resultt-e"><a class="header" href="#common-ways-to-handle-resultt-e">Common Ways to Handle <code>Result&lt;T, E&gt;</code></a></h3>
+<h4 id="1-propagate-the-error--operator"><a class="header" href="#1-propagate-the-error--operator">1. <strong>Propagate the Error (<code>?</code> Operator)</strong></a></h4>
+<pre><pre class="playground"><code class="language-rust no_run"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn read_file() -&gt; Result&lt;String, std::io::Error&gt; {
+    let content = std::fs::read_to_string("config.txt")?;
+    Ok(content)
+}
+<span class="boring">}</span></code></pre></pre>
+<ul>
+<li>The <code>?</code> operator <strong>short-circuits</strong> on <code>Err(E)</code>, returning it immediately.</li>
+<li>Only works in functions that return <code>Result&lt;T, E&gt;</code>.</li>
+</ul>
+<h4 id="2-handle-the-error-manually"><a class="header" href="#2-handle-the-error-manually">2. <strong>Handle the Error Manually</strong></a></h4>
+<pre><pre class="playground"><code class="language-rust">use std::fs::File;
+
+fn main() {
+    let file = File::open("config.txt");
+    match file {
+        Ok(f) =&gt; println!("File opened successfully!"),
+        Err(e) =&gt; println!("Failed to open file: {}", e),
+    }
+}</code></pre></pre>
+<ul>
+<li>The <code>match</code> statement allows custom error handling.</li>
+</ul>
+<h4 id="3-use-unwrap-or-expect-risky"><a class="header" href="#3-use-unwrap-or-expect-risky">3. <strong>Use <code>unwrap()</code> or <code>expect()</code></strong> <em>(Risky!)</em></a></h4>
+<pre><pre class="playground"><code class="language-rust no_run"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let file = File::open("config.txt").unwrap(); // Panics if it fails
+let file = File::open("config.txt").expect("Failed to open file"); // Custom panic message
+<span class="boring">}</span></code></pre></pre>
+<ul>
+<li>Use <strong>only if you are sure</strong> the operation will succeed.</li>
+<li>Recommended for <strong>quick prototyping</strong> or <strong>tests</strong>.</li>
+</ul>
+<h4 id="4-using-unwrap_or-and-unwrap_or_else"><a class="header" href="#4-using-unwrap_or-and-unwrap_or_else">4. <strong>Using <code>unwrap_or()</code> and <code>unwrap_or_else()</code></strong></a></h4>
+<pre><pre class="playground"><code class="language-rust">use std::fs::File;
+
+fn main() {
+    let file = File::open("config.txt").unwrap_or_else(|_| {
+        println!("File not found, creating a new one.");
+        File::create("config.txt").expect("Failed to create file")
+    });
+}</code></pre></pre>
+<ul>
+<li><code>unwrap_or(default_value)</code> provides a fallback value.</li>
+<li><code>unwrap_or_else(|err| handle_error(err))</code> allows custom error handling.</li>
+</ul>
+<hr />
+<h2 id="3-custom-errors-with-thiserror-and-anyhow"><a class="header" href="#3-custom-errors-with-thiserror-and-anyhow">3. Custom Errors with <code>thiserror</code> and <code>anyhow</code></a></h2>
+<p>For complex applications, defining custom error types is beneficial.</p>
+<h3 id="using-thiserror-for-custom-errors"><a class="header" href="#using-thiserror-for-custom-errors">Using <code>thiserror</code> for Custom Errors</a></h3>
+<pre><pre class="playground"><code class="language-rust  no_run">use std::fs::File;
+use std::io::{self, Read};
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum MyError {
+    #[error("File error: {0}")]
+    FileError(std::io::Error),
+    #[error("Invalid input: {0}")]
+    InvalidInput(String),
+}
+
+fn read_file(file_name: &amp;str) -&gt; Result&lt;String, MyError&gt; {
+    let mut file = File::open(file_name).map_err(MyError::FileError)?;
+    let mut contents = String::new();
+    file.read_to_string(&amp;mut contents).map_err(MyError::FileError)?;
+    Ok(contents)
+}
+
+fn main() {
+    match read_file("example.txt") {
+        Ok(contents) =&gt; println!("File content: {}", contents),
+        Err(e) =&gt; println!("An error occurred: {}", e),
+    }
+}</code></pre></pre>
+<ul>
+<li>Use <code>#[error("message")]</code> to format error messages.</li>
+<li>Allows structured error handling.</li>
+</ul>
+<h3 id="using-anyhow-for-simpler-error-handling"><a class="header" href="#using-anyhow-for-simpler-error-handling">Using <code>anyhow</code> for Simpler Error Handling</a></h3>
+<pre><pre class="playground"><code class="language-rust  no_run"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use anyhow::{Context, Result};
+use std::fs::File;
+
+fn open_file() -&gt; Result&lt;File&gt; {
+    let file = File::open("config.txt").context("Could not open config file")?;
+    Ok(file)
+}
+<span class="boring">}</span></code></pre></pre>
+<ul>
+<li><code>anyhow::Result&lt;T&gt;</code> allows returning <strong>multiple error types</strong> easily.</li>
+<li><code>.context()</code> provides <strong>custom error messages</strong>.</li>
+</ul>
+<hr />
+<h2 id="summary-of-rust-error-handling-techniques"><a class="header" href="#summary-of-rust-error-handling-techniques">Summary of Rust Error Handling Techniques</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Technique</th><th>Use Case</th></tr></thead><tbody>
+<tr><td><code>panic!()</code></td><td>Unrecoverable errors that should crash the program.</td></tr>
+<tr><td><code>Result&lt;T, E&gt;</code></td><td>Recoverable errors where failure is an expected possibility.</td></tr>
+<tr><td><code>?</code> operator</td><td>Propagating errors in functions returning <code>Result&lt;T, E&gt;</code>.</td></tr>
+<tr><td><code>match</code></td><td>Custom error handling logic.</td></tr>
+<tr><td><code>unwrap()</code> / <code>expect()</code></td><td>Quick debugging, <strong>but avoid in production</strong>.</td></tr>
+<tr><td><code>unwrap_or()</code> / <code>unwrap_or_else()</code></td><td>Provide default values or custom error handling.</td></tr>
+<tr><td><code>thiserror</code></td><td>Custom structured error types.</td></tr>
+<tr><td><code>anyhow</code></td><td>Simple error handling with better error messages.</td></tr>
+</tbody></table>
+</div>
+<p>By following these practices, you can write <strong>safe, reliable, and robust Rust applications</strong>! 🚀</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="05-the_binary.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="81_testing.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="05-the_binary.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="81_testing.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,559 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Rust Projects - Using rust to implement the simulated annealing algorithm</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Using rust to implement the simulated annealing algorithm</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="create-a-rust-project-and-implement-the-class"><a class="header" href="#create-a-rust-project-and-implement-the-class">Create a Rust Project and Implement the Class</a></h1>
+<p>A Rust <strong>class</strong> is a combination of a struct- (data) and an impl-block (functions). But as in R a Rust <strong>package</strong> contains several other important files and a specific folder structure.</p>
+<p>As an R programmer, you're likely familiar with using tools like devtools to streamline the creation of R packages. In Rust, the process of setting up a new package is just as straightforward, though the terminology and structure differ slightly.</p>
+<p>This will create the folder, populate it with some files and prepare it for git usage.</p>
+<pre><code>cargo new --bin simulated_annealing
+</code></pre>
+<p>For later use we create a <strong>simulated_annealing/tests</strong> folder and a <strong>simulated_annealing/src/lib.rs</strong> file.</p>
+<p>I normally put as much code into the library and keep the script as slender as possible.</p>
+<h2 id="for-the-class---which-data-structures-do-we-need"><a class="header" href="#for-the-class---which-data-structures-do-we-need">For the class - which data structures do we need?</a></h2>
+<ol>
+<li>The 'expression' data</li>
+<li>The rows &lt;-&gt; cluster connections</li>
+<li>The number of clusters asked for</li>
+<li>The actual temperature of the system</li>
+</ol>
+<p>** Let's create the object**</p>
+<p>Open the src/lib.rs file and add this:</p>
+<pre><pre class="playground"><code class="language-rust no_run"><span class="boring">#![allow(unused)]
+</span>
+<span class="boring">fn main() {
+</span>pub struct SimulatedAnnealing {
+    /// the normalized expression data
+    pub data: Vec&lt;Vec&lt;f32&gt;&gt;,
+    /// the names for each row
+    rownames: Vec&lt;String&gt;,
+    /// the cluster ids for each row of data
+    clusters: Vec&lt;usize&gt;,
+    /// expected clusters k
+    k: usize,
+    /// the actual temerature
+    temp:f32,
+}
+
+impl SimulatedAnnealing {
+    pub fn new( file_path:&amp;str, k:usize, temp:f32, split:char ) -&gt; Self{
+
+        let (rownames, data) = Self::read_table_with_names( file_path, split ).unwrap();
+
+        let clusters: Vec&lt;usize&gt; = rownames.iter().map(|_| rand::thread_rng().gen_range(1..=k)).collect();
+
+        Self{
+            data,
+            rownames,
+            clusters,
+            clusters_energy: vec![0.0; k ],
+            temp,
+        }
+    }
+}
+
+<span class="boring">}</span></code></pre></pre>
+<p>This will define a class with the variables data, rownames, clusters, k and temp as well as the new() function for this class, which in turn populates these variables with initial values. Save the file and try to compile your project using</p>
+<pre><code class="language-bash">cargo test -r
+</code></pre>
+<pre><code class="language-text">   Compiling simulated_annealing v0.1.0 (/home/med-sal/git_Projects/mdbook_simulted_annealing_in_rust/rust_stages/step1)
+error[E0599]: no function or associated item named `read_table_with_names` found for struct `SimulatedAnnealing` in the current scope
+  --&gt; src/lib.rs:21:38
+   |
+2  | pub struct SimulatedAnnealing {
+   | ----------------------------- function or associated item `read_table_with_names` not found for this struct
+...
+21 |         let (rownames, data) = Self::read_table_with_names( file_path, split ).unwrap();
+   |                                      ^^^^^^^^^^^^^^^^^^^^^ function or associated item not found in `SimulatedAnnealing`
+   |
+note: if you're trying to build a new `SimulatedAnnealing`, consider using `SimulatedAnnealing::new` which returns `SimulatedAnnealing`
+  --&gt; src/lib.rs:19:5
+   |
+19 |     pub fn new( file_path:&amp;str, k:usize, temp:f32, split:char ) -&gt; Self{
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: use of undeclared crate or module `rand`
+  --&gt; src/lib.rs:23:60
+   |
+23 |         let clusters: Vec&lt;usize&gt; = rownames.iter().map(|_| rand::thread_rng().gen_range(0..k)).collect();
+   |                                                            ^^^^ use of undeclared crate or module `rand`
+
+Some errors have detailed explanations: E0433, E0599.
+For more information about an error, try `rustc --explain E0433`.
+error: could not compile `simulated_annealing` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `simulated_annealing` (lib test) due to 2 previous errors
+
+</code></pre>
+<h3 id="missing-library-error"><a class="header" href="#missing-library-error">missing library error:</a></h3>
+<p>Right - we try to create the random cluster info and have not loaded the required package. That is simple to do in Rust:</p>
+<pre><code>cargo add rand
+</code></pre>
+<p>This will download and compile the rand crate and add the rand package as depencancy in Cargo.toml.
+Do not forget to also load that library in the lib.rs file - at the top of that file add <code>use rand::Rng;</code>.</p>
+<h3 id="missing-function-error"><a class="header" href="#missing-function-error">missing function error:</a></h3>
+<p>The read_table function is more complicated.
+I normally out-source these simple, but tedious steps to ChatGPT or an other AI helper, but these are the steps we need to take:</p>
+<ol>
+<li>create a Path from the <code>&amp;str</code> file_name</li>
+<li>open that Path</li>
+<li>create a BuffReader from that File to more efficiently read from it</li>
+<li>iterate over the lines and</li>
+<li>split the line by sep (could be user defined too - or?)</li>
+<li>use the first entry as rowname (String) and the rest as numeric (f32).</li>
+</ol>
+<p>To fix the issues you need load these libraries at the beginning of the lib.rs file:</p>
+<pre><pre class="playground"><code class="language-rust no_run"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::path::Path;
+use std::fs::File;
+use std::io::{BufReader, BuffRead};
+use rand::Rng;
+<span class="boring">}</span></code></pre></pre>
+<p>And then add the following rust function into the impl block:</p>
+<pre><pre class="playground"><code class="language-rust no_run"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>    pub fn read_table_with_names(file_path: &amp;str, split: char ) -&gt; Result&lt;( Vec&lt;String&gt;, Vec&lt;Vec&lt;f32&gt;&gt;), String&gt; {
+        let path = Path::new(file_path);
+        let file = match File::open(path){
+          Ok(f) =&gt; f,
+          Err(e) =&gt; {
+            return Err( format!("Failed to open file: {}", e) )
+          }
+        };
+        let reader = BufReader::new(file);
+
+        let mut data = Vec::new();
+        let mut rownames= Vec::new();
+
+        for (line_num, line) in reader.lines().enumerate() {
+            let line = line.map_err(|e| format!("Error reading line {}: {}", line_num + 1, e))?;
+            let mut parts = line.split( split );
+
+            let row_name = parts.next().ok_or_else(|| format!("Missing row name at line {}", line_num + 1))?;
+            if row_name == "" {
+                // ignore column names
+                continue;
+            }
+            rownames.push( row_name.to_string() );
+
+            let values: Result&lt;Vec&lt;f32&gt;, String&gt; = parts
+                .map(|num| num.parse::&lt;f32&gt;().map_err(|_| format!("Invalid number '{}' at line {}", num, line_num + 1)))
+                .collect();
+
+            let values = values.unwrap(); // will die on error
+            data.push( values );
+        }
+
+        Ok( (rownames,data) )
+    }
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Understanding <code>read_table_with_names</code></strong></p>
+<p>If you're an R developer, think of it as a combination of <code>read.table()</code> with custom handling for row names and numeric conversion.</p>
+<h2 id="function-overview"><a class="header" href="#function-overview">Function Overview</a></h2>
+<h3 id="function-signature"><a class="header" href="#function-signature">Function Signature</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn read_table_with_names(file_path: &amp;str, split: char ) -&gt; Result&lt;( Vec&lt;String&gt;, Vec&lt;Vec&lt;f32&gt;&gt;), String&gt;
+<span class="boring">}</span></code></pre></pre>
+<p>This function:</p>
+<ul>
+<li>Takes a <strong>file path</strong> (<code>file_path: &amp;str</code>) as a string reference.</li>
+<li>Accepts a <strong>delimiter character</strong> (<code>split: char</code>) to separate values.</li>
+<li>Returns a <strong>Result type</strong> containing either:
+<ul>
+<li>A tuple of <strong>row names</strong> (<code>Vec&lt;String&gt;</code>) and <strong>numeric data matrix</strong> (<code>Vec&lt;Vec&lt;f32&gt;&gt;</code>).</li>
+<li>Or an error message (<code>String</code>) in case of failure.</li>
+</ul>
+</li>
+</ul>
+<h2 id="breaking-it-down"><a class="header" href="#breaking-it-down">Breaking It Down</a></h2>
+<h3 id="step-1-open-the-file"><a class="header" href="#step-1-open-the-file">Step 1: Open the File</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let path = Path::new(file_path);
+let file = match File::open(path){
+    Ok(f) =&gt; f,
+    Err(e) =&gt; {
+        return Err(format!("Failed to open file: {}", e));
+    }
+};
+<span class="boring">}</span></code></pre></pre>
+<p><strong>What it does:</strong></p>
+<ul>
+<li>Converts <code>file_path</code> into a <code>Path</code> object.</li>
+<li>Tries to open the file using <code>File::open(path)</code>. If successful, it assigns the file handle to <code>f</code>.</li>
+<li>If the file opening fails, it returns an error message.</li>
+</ul>
+<p><strong>R Equivalent:</strong></p>
+<pre><code class="language-r">if (!file.exists(file_path)) {
+  stop(paste("Failed to open file:", file_path))
+}
+</code></pre>
+<h3 id="step-2-prepare-the-variables"><a class="header" href="#step-2-prepare-the-variables">Step 2: Prepare the Variables</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let reader = BufReader::new(file);
+let mut data = Vec::new();
+let mut rownames = Vec::new();
+<span class="boring">}</span></code></pre></pre>
+<p><strong>What it does:</strong></p>
+<ul>
+<li>Wraps the file handle in <code>BufReader</code> for efficient line-by-line reading.</li>
+<li>Initializes empty vectors:
+<ul>
+<li><code>data</code>: Stores numeric values (like a matrix in R).</li>
+<li><code>rownames</code>: Stores row names.</li>
+</ul>
+</li>
+</ul>
+<h3 id="step-3-parse-each-line"><a class="header" href="#step-3-parse-each-line">Step 3: Parse Each Line</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>for (line_num, line) in reader.lines().enumerate() {
+    let line = line.map_err(|e| format!("Error reading line {}: {}", line_num + 1, e))?;
+    let mut parts = line.split(split);
+<span class="boring">}</span></code></pre></pre>
+<p><strong>What it does:</strong></p>
+<ul>
+<li>Iterates over each line, keeping track of line numbers.</li>
+<li>Splits the line into separate values based on <code>split</code> (e.g., <code>\t</code> for TSV, <code>,</code> for CSV).</li>
+<li>Handles file reading errors gracefully.</li>
+</ul>
+<h3 id="step-4-extract-row-names"><a class="header" href="#step-4-extract-row-names">Step 4: Extract Row Names</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let row_name = parts.next().ok_or_else(|| format!("Missing row name at line {}", line_num + 1))?;
+if row_name == "" {
+    continue; // Ignore column names
+}
+rownames.push(row_name.to_string());
+<span class="boring">}</span></code></pre></pre>
+<p><strong>What it does:</strong></p>
+<ul>
+<li>Retrieves the first value from the line as the <strong>row name</strong>.</li>
+<li>If no row name is found, it returns an error.</li>
+<li>Skips empty row names (useful for ignoring headers).</li>
+<li>Adds valid row names to <code>rownames</code>.</li>
+</ul>
+<p><strong>R Equivalent:</strong></p>
+<pre><code class="language-r">data &lt;- read.table(file_path, sep="\t", header=TRUE, row.names=1)
+rownames &lt;- rownames(data)
+</code></pre>
+<h3 id="step-5-convert-remaining-values-to-f32"><a class="header" href="#step-5-convert-remaining-values-to-f32">Step 5: Convert Remaining Values to <code>f32</code></a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let values: Result&lt;Vec&lt;f32&gt;, String&gt; = parts
+    .map(|num| num.parse::&lt;f32&gt;().map_err(|_| format!("Invalid number '{}' at line {}", num, line_num + 1)))
+    .collect();
+let values = values.unwrap();
+data.push(values);
+<span class="boring">}</span></code></pre></pre>
+<p><strong>What it does:</strong></p>
+<ul>
+<li>Attempts to convert each remaining value in the row into <code>f32</code>.</li>
+<li>If a value is invalid, an error message is returned.</li>
+<li>Pushes the successfully parsed row into <code>data</code>.</li>
+</ul>
+<p><strong>R Equivalent:</strong></p>
+<pre><code class="language-r">data_matrix &lt;- as.matrix(data)
+data_matrix &lt;- apply(data_matrix, 2, as.numeric) # Convert to numeric
+</code></pre>
+<h3 id="step-6-return-the-parsed-data"><a class="header" href="#step-6-return-the-parsed-data">Step 6: Return the Parsed Data</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>Ok((rownames, data))
+<span class="boring">}</span></code></pre></pre>
+<ul>
+<li>If everything succeeds, returns a tuple: <strong>(row names, numeric matrix)</strong>.</li>
+<li>The <code>Result</code> type ensures proper error handling.</li>
+</ul>
+<h3 id="why-are-there-so-many-ways-to-create-the-error"><a class="header" href="#why-are-there-so-many-ways-to-create-the-error">Why are there so many ways to create the error?</a></h3>
+<p>In short Rust has two classes to handle errors: a <strong>Result</strong> that allows for an error being returned if something fails and a <strong>Option</strong> which only allows None to be returned if something fails. Error handling is discussed in more detail in the <a href="80-ErrorHandling.html">Appendix</a>.</p>
+<p>So if we re-compile this - will it work? If not just follow the compiler's help ;-)</p>
+<h2 id="adding-a-test-for-read_table_with_names"><a class="header" href="#adding-a-test-for-read_table_with_names">Adding a Test for <code>read_table_with_names</code></a></h2>
+<p><strong>Why Testing Matters</strong></p>
+<p>Currently, our function compiles, but without a test, we cannot verify correctness. Unit testing ensures the function behaves as expected under various conditions.</p>
+<h2 id="implementing-a-unit-test"><a class="header" href="#implementing-a-unit-test">Implementing a Unit Test</a></h2>
+<p>Unit tests should be included at the end of the same file where the function is defined - there they can access private functions and variables of the class.</p>
+<pre><pre class="playground"><code class="language-rust no_run"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[cfg(test)]
+mod tests {
+    use super::*; // Import everything from the parent module
+
+    #[test]
+    fn test_read_data() {
+        match read_table_with_names("tests/data/Spellman_Yeast_Cell_Cycle.tsv", '\t') {
+            Ok((rownames, data)) =&gt; {
+                assert_eq!(data.len(), 256, "Expected 256 rows");
+                assert_eq!(data[0].len(), 16, "Expected 16 columns");
+                assert_eq!(rownames.len(), data.len(), "Row names should match row count");
+            }
+            Err(e) =&gt; {
+                panic!("Could not read the TSV file: {e}");
+            }
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="explanation"><a class="header" href="#explanation">Explanation</a></h3>
+<ul>
+<li>Uses Rust's built-in testing framework (<code>#[test]</code> attribute).</li>
+<li>Calls <code>read_table_with_names()</code> with a sample TSV file.</li>
+<li>Asserts expected row and column counts, ensuring data integrity.</li>
+<li>Panics with an error message if file reading fails.</li>
+</ul>
+<p>By adding this test, we verify that our function properly reads tabular data and correctly extracts row names and numeric values. I have a complete chapter on testing in Rust: @ref(testing).</p>
+<p>For this to work we need to create the folder in our package and download <a href="https://github.com/shambam/R_programming_1/raw/refs/heads/main/Spellman_Yeast_Cell_Cycle.tsv">this file</a> there.</p>
+<pre><code>mkdir -p tests/data
+wget https://github.com/shambam/R_programming_1/raw/refs/heads/main/Spellman_Yeast_Cell_Cycle.tsv -O tests/data/Spellman_Yeast_Cell_Cycle.tsv
+</code></pre>
+<p>Now you can compile and test that the file is read correctly:</p>
+<pre><code class="language-{bash}">cargo test -r
+</code></pre>
+<pre><code class="language-text">
+running 1 test
+test tests::test_read_data ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test test_simulated_annealing ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+</code></pre>
+<p>Cool! First class first class function and first test - and everything is working - or?</p>
+<p>Lets also add a test for the new() function. This function should be accessible from outside and therefore we should create a new test file. Create the file <code>tests/test-SimulatedAnnealing.rs</code> and fill it with this:</p>
+<pre><pre class="playground"><code class="language-rust no_run"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use simulated_annealing::SimulatedAnnealing; // load our library
+
+#[test]
+fn test_simulated_annealing() {
+    let sa = SimulatedAnnealing::new( "tests/data/Spellman_Yeast_Cell_Cycle.tsv", 10, 200.0, '\t' );
+    assert_eq!(sa.data.len(), 256, "we have 256 rows");
+    assert_eq!(sa.data[0].len(), 16, "we have 16 cols");
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Test this again.</p>
+<p>So all that is left is to implement the main simulated annealing algorithm!</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="02-Variables.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="04-SimulatedAnnealing.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="02-Variables.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="04-SimulatedAnnealing.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
