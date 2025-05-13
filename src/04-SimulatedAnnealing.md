@@ -10,7 +10,7 @@ Therefore we will use Shamit's R implementation and convert that to Rust.
 
 The scale.01 function in R is defined as follows:
 
-```
+```r
 scale.01 <- function(v){
   sc.01 <- (v - min(v)) / (max(v) - min(v))
   sc.01
@@ -31,7 +31,7 @@ At first glance, this function seems to be a simple and effective way to scale a
 
 In Rust, the equivalent function would modify the existing data structure in place for efficiency. Here’s an example:
 
-```
+```rust,no_run
 pub fn scale_01(&mut self) {
     for row in &mut self.data {
         let mut min = f32::INFINITY;
@@ -68,7 +68,7 @@ pub fn scale_01(&mut self) {
 
 The R function `calc.Ek` calculates the energy of a specific cluster in a dataset. Here's the R code:
 
-```
+```r
 calc.Ek <- function(m, clus, coi){
   clus.d <- m[which(clus == coi), ]
   Ek <- sum(dist(clus.d))
@@ -95,7 +95,7 @@ calc.Ek <- function(m, clus, coi){
 
 The equivalent function in Rust is implemented with more explicit control over memory and data. Here's the Rust code:
 
-```
+```rust,no_run
 /// Function to compute the Euclidean distance between rows of data
 fn euclidean_distance(&self, i: usize, j: usize) -> f32 {
     let v1 = &self.data[i];
@@ -163,7 +163,7 @@ The R code provided implements the simulated annealing algorithm in the followin
 5. **Cooling**: The temperature is updated in each iteration by multiplying it with a cooling factor.
 
 
-```
+```r
 #This is the main algorithm that performs the annealing. It takes the data,how
 #many K we are looking for, The number of iterations to perform, starting
 #temperature and the cooling factor.
@@ -228,7 +228,7 @@ The Rust version of the algorithm closely follows the same logic as the R implem
 5. **Cooling**: The temperature is updated similarly to R, using a multiplicative cooling factor.
 
 
-```
+```rust,no_run
     pub fn run( &mut self, max_iter:usize, cool:f32 ) -> usize {
     
       let mut it = 0;
@@ -278,7 +278,7 @@ The Rust version of the algorithm closely follows the same logic as the R implem
     
 ```
 
-There is not a lot of differences in the implementation - the rust code is even one line shorter as the R one.
+There is not a lot of differences in the implementation - the rust code is even one line shorter than the R one.
 
 
 ## And Funtions to Plot and Write the Data
@@ -288,7 +288,7 @@ I assume that by now you understand what the write_clusters function is doing.
 Plotting is a lot different from R; I have just obtained that function structure from ChatGPT and fixed some errors.
 Just take it as is.
 
-```
+```rust,no_run
 use plotters::prelude::*;
 use std::error::Error;
 use std::io::Write;
@@ -359,7 +359,7 @@ cargo add plotters
 If all has gone well we could improve on our tests!
 Add a second test case into the lib.rs file:
 
-```
+```rust,no_run
     #[test]
     fn tes_scale01(){
         let mut obj = SimulatedAnnealing::new( "tests/data/Spellman_Yeast_Cell_Cycle.tsv", 8, 1000.0, '\t' );

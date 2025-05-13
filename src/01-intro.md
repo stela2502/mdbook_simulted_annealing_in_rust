@@ -76,7 +76,9 @@ fn main() {
 ---
 
 ## **The Problem: Clustering Expression Data Using Simulated Annealing**
-The algorithm we will implement is based on an **R programming exercise** given to students. It clusters gene expression data using **simulated annealing**, a probabilistic optimization method. This algorithm is **simple to understand and implement**, but it also touches on several **important programming concepts**, including:
+
+The algorithm we will implement is based on the final project from our [**first R programming course.**](https://sccbioinformatics.github.io/R_programming_1/#The_Final_Project)
+It clusters gene expression data using **simulated annealing**, a probabilistic optimization method. This algorithm is **simple to understand and implement**, but it also touches on several **important programming concepts**, including:
 - **File reading**
 - **Control flow (loops, conditionals)**
 - **Data structures (vectors, matrices, hashes)**
@@ -93,13 +95,21 @@ Yeast in liquid culture were synchronized at the **same cell-cycle phase** and t
 
 ## Simulated annealing
 
-We can think of well clustered data having low energy, in that each cluster is tight and has little within cluster variance. If we calculate the variance *within* each cluster and sum over all clusters we get the total variance (energy) of the system. To measure the distance between two genes $i$ and $j$ over $t$ timepoints we do:
+<!--
+Now, suppose we have 1,000 genes and we want to partition them into 10 clusters. The number of possible clusterings is astronomically large, making it infeasible to try every combination to find the true minimum $E(K)$. 
+This is why we turn to heuristic algorithms — methods that guide us toward a near-optimal solution in a reasonable amount of time.
+-->
+
+We can think of well-clustered data as having low energy, meaning each cluster is tight and exhibits low within-cluster variance. If we calculate the variance within each cluster and sum over all clusters, we obtain the total variance, which we interpret as the energy of the system.
+
+To measure the distance between two genes ii and jj across tt time points, we use the Euclidean distance:
 
 $$d_{ij}=\sqrt{\sum{(g^{i}_t-g^{j}_t)^2}}$$
 
-so to measure the energy (total variance) of a clustering we sum the pairwise distances for each cluster $K$, and then sum over all $K$s and them divide by $K$.
-
+To quantify the energy (i.e., total variance) of a clustering, we compute the sum of all pairwise distances within each cluster $C_K$, then average this across all $K$ clusters:
 $$ E(K)=\frac{1}{K}\sum^K_{k=1} \left[ \sum_{i\epsilon Ck}\sum_{j\epsilon Ck} d_{ij}\right] $$
+
+For well-clustered data, $E(K)$ should be as small as possible.
 
 For a well clustered data, $E(K)$ should be as **small** as possible. Lets say we have 1000 genes, and we want to partition them into 10 clusters. The number of combinations is too high for us to try each one to brute force a true $E$. This is why we use a *heuristic* algorithm to get us as close to the solution as possible in a smaller amount of time.
 
@@ -123,4 +133,5 @@ I do not want to focus too much onto the algoirithm here as the main focus is on
   6. report the cluster information - if possible create plots
   
 And all of that in Rust ;-)
+
 

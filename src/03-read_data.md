@@ -23,7 +23,7 @@ I normally put as much code into the library and keep the script as slender as p
 
 Open the src/lib.rs file and add this:
 
-```
+```rust,no_run
 
 pub struct SimulatedAnnealing {
     /// the normalized expression data
@@ -81,23 +81,23 @@ Do not forget to also load that library in the lib.rs file - at the top of that 
 The read_table function is more complicated.
 I normally out-source these simple, but tedious steps to ChatGPT or an other AI helper, but these are the steps we need to take:
 
- 1. create a Path from the &str file_name
+ 1. create a Path from the `&str` file_name
  2. open that Path
  3. create a BuffReader from that File to more efficiently read from it
  4. iterate over the lines and
  5. split the line by sep (could be user defined too - or?)
  6. use the first entry as rowname (String) and the rest as numeric (f32). 
 
-To fix the issues you need to add this in at the beginning of the lib.rs file
+To fix the issues you need load these libraries at the beginning of the lib.rs file:
 
-```
+```rust,no_run
 use std::path::Path;
 use std::fs::File;
 use std::io::{BufReader, BuffRead};
 use rand::Rng;
 ```
-And the following rust function  into the impl block.
-```
+And then add the following rust function into the impl block:
+```rust,no_run
     pub fn read_table_with_names(file_path: &str, split: char ) -> Result<( Vec<String>, Vec<Vec<f32>>), String> {
         let path = Path::new(file_path);
         let file = match File::open(path){
@@ -247,7 +247,7 @@ Ok((rownames, data))
 
 ### Why are there so many ways to create the error? 
 
-In short Rust has two classes to handle errors: a **Result** that allows for an error being returned if something fails and a **Option** which only allows None to be returned if something fails. If you want more details to that you can read on here \@ref(error-handling).
+In short Rust has two classes to handle errors: a **Result** that allows for an error being returned if something fails and a **Option** which only allows None to be returned if something fails. Error handling is discussed in more detail in the [Appendix](80-ErrorHandling.md).
 
 So if we re-compile this - will it work? If not just follow the compiler's help ;-)
 
@@ -261,7 +261,7 @@ Currently, our function compiles, but without a test, we cannot verify correctne
 ## Implementing a Unit Test
 Unit tests should be included at the end of the same file where the function is defined - there they can access private functions and variables of the class.
 
-```rust
+```rust,no_run
 #[cfg(test)]
 mod tests {
     use super::*; // Import everything from the parent module
@@ -310,8 +310,8 @@ Cool! First class first class function and first test - and everything is workin
 
 Lets also add a test for the new() function. This function should be accessible from outside and therefore we should create a new test file. Create the file ``tests/test-SimulatedAnnealing.rs`` and fill it with this:
 
-```
-use simulated_annealing::SimulatedAnnealing; // Replace `my_crate` with your actual crate name
+```rust,no_run
+use simulated_annealing::SimulatedAnnealing; // load our library
 
 #[test]
 fn test_simulated_annealing() {

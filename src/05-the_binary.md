@@ -121,23 +121,22 @@ fn main() {
         Ok(_) => println!("Clusters written to {}", &opts.outfile ),
         Err(e) => eprintln!("Failed to write the data to {}: {:?}", &opts.outfile, e),
     }
-
     match now.elapsed() {
         Ok(elapsed) => {
-            let mut milli = elapsed.as_millis();
+            let hours = elapsed.as_secs() / 3600; // Calculate hours
+            let minutes = (elapsed.as_secs() % 3600) / 60; // Calculate minutes
+            let seconds = elapsed.as_secs() % 60; // Calculate remaining seconds
+            let milliseconds = elapsed.subsec_millis(); // Milliseconds
+            let microseconds = elapsed.subsec_micros(); // Microseconds (if needed)
 
-            let mil = milli % 1000;
-            milli= (milli - mil) /1000;
-
-            let sec = milli % 60;
-            milli= (milli -sec) /60;
-
-            let min = milli % 60;
-            milli= (milli -min) /60;
-
-            eprintln!("finished in {milli} h {min} min {sec} sec {mil} milli sec");
+            eprintln!(
+                "finished in {} h {} min {} sec {} ms",
+                hours, minutes, seconds, milliseconds
+            );
         },
-        Err(e) => {println!("Error: {e:?}");}
+        Err(e) => {
+            println!("Error: {e:?}");
+        }
     }
 }
 
@@ -157,7 +156,7 @@ cargo test -r
 You now can run the executable target/release/simulated_annealing like that:
 
 ```{bash}
-target/release/simulated_annealing  -f tests/data/Spellman_Yeast_Cell_Cycle.tsv --clusters 8 --temp 20 --outfile /tmp/clusters.tsv --max-id 10000
+target/release/simulated_annealing  -f tests/data/Spellman_Yeast_Cell_Cycle.tsv --clusters 8 --temp 20 --outfile /tmp/clusters.tsv --max-it 10000
 ```
 
 ```text
@@ -241,29 +240,28 @@ fn main() {
 
     let _= sim.plot( &opts.outfile );
 
-    println!("Final state {sim} after {iterations} iterations");
+    println!("Final state after {iterations} iterations: {sim}");
 
     match sim.write_clusters( &opts.outfile, sep ){
         Ok(_) => println!("Clusters written to {}", &opts.outfile ),
         Err(e) => eprintln!("Failed to write the data to {}: {:?}", &opts.outfile, e),
     }
-
     match now.elapsed() {
         Ok(elapsed) => {
-            let mut milli = elapsed.as_millis();
-
-            let mil = milli % 1000;
-            milli= (milli - mil) /1000;
-
-            let sec = milli % 60;
-            milli= (milli -sec) /60;
-
-            let min = milli % 60;
-            milli= (milli -min) /60;
-
-            eprintln!("finished in {milli} h {min} min {sec} sec {mil} milli sec");
+            let hours = elapsed.as_secs() / 3600; // Calculate hours
+            let minutes = (elapsed.as_secs() % 3600) / 60; // Calculate minutes
+            let seconds = elapsed.as_secs() % 60; // Calculate remaining seconds
+            let milliseconds = elapsed.subsec_millis(); // Milliseconds
+            let microseconds = elapsed.subsec_micros(); // Microseconds (if needed)
+    
+            eprintln!(
+                "finished in {} h {} min {} sec {} ms",
+                hours, minutes, seconds, milliseconds
+            );
         },
-        Err(e) => {println!("Error: {e:?}");}
+        Err(e) => {
+            println!("Error: {e:?}");
+        }
     }
 }
 ```
@@ -273,13 +271,14 @@ If we have more time we could implement one more improvement to the library:
 
 Add a store variable into the class and populate it with the row to row distances after you have scaled the data.
 Then modify the calc_ek() function to use the values from the store and not calculate the distances every single time.
-This should give you an additional 5x speed improvement if you store it as a Vec<Vec<f32>> again. If you use a single vector and an index function you could get an even better performance.
+This modification will of cause be more beneficial if you run more iterations. If you calculate $1e+6$ iterations
+you can get an additional 5x speed improvement by storing the euclidian distances as a Vec<Vec<f32>> again. If you use a single vector and an index function you could get an even better performance.
 
 ## Take Home Message
 
-The implementation of the functions is significantly different from R or Python, but with the compiler and the AI assistance we can get at the moment it, is doable. Coding in Rust takes time to get into, but the speed improvements can be worth it.
+The implementation of the functions is significantly different from R or Python, but with the compiler and the AI assistance we can get at the moment it (2025), is doable. Coding in Rust takes time to get into, but the speed improvements can be worth it.
 
-This example here does not really highlight the usability as the R code also finished in a reasonable amount of time, but if you have more complicated tasks - like processing BAM files or anything else that is (1) either easy to implement in a multiprocessor system or (2) needs to process binary data, it is worth to look into Rust. It is somewhat slower than C and C++ (like 3 to 5 times?), but Rust is so much easier to program in if you come from R and Python - it is worth it.
+This example here does not really highlight the usability as the R code also finished in a reasonable amount of time, but if you have more complicated tasks - like processing BAM files or anything else that is (1) either easy to implement in a multiprocessor system or (2) needs to process binary data, it is worth to look into Rust. It is somewhat slower than C and C++ (up to 5 times?), but Rust is so much easier to program in if you come from R and Python - it is worth it.
 
 By the way - I used a ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>> for my store and gained another speed boost of factor 2. Given the fact that this takes either 60 or 30 milliseconds this is no big deal. For the sake of this tutorial I think a Vec<Vec<_>> is easier to work with. You can check out my other implementation [here](https://github.com/stela2502/simulated_annealing).
 

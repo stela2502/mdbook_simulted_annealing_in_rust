@@ -56,7 +56,7 @@ fn main() -> Result<(), Error> {
 ### Common Ways to Handle `Result<T, E>`
 
 #### 1. **Propagate the Error (`?` Operator)**
-```rust
+```rust,no_run
 fn read_file() -> Result<String, std::io::Error> {
     let content = std::fs::read_to_string("config.txt")?;
     Ok(content)
@@ -80,7 +80,7 @@ fn main() {
 - The `match` statement allows custom error handling.
 
 #### 3. **Use `unwrap()` or `expect()`** *(Risky!)*
-```rust
+```rust,no_run
 let file = File::open("config.txt").unwrap(); // Panics if it fails
 let file = File::open("config.txt").expect("Failed to open file"); // Custom panic message
 ```
@@ -108,7 +108,7 @@ fn main() {
 For complex applications, defining custom error types is beneficial.
 
 ### Using `thiserror` for Custom Errors
-```rust
+```rust ,no_run
 use std::fs::File;
 use std::io::{self, Read};
 use thiserror::Error;
@@ -139,7 +139,7 @@ fn main() {
 - Allows structured error handling.
 
 ### Using `anyhow` for Simpler Error Handling
-```rust
+```rust ,no_run
 use anyhow::{Context, Result};
 use std::fs::File;
 

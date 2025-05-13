@@ -89,7 +89,7 @@ cargo test -- --ignored
 ## 6. Benchmarking with `#[bench]`
 
 Rust provides benchmarking via the `test` crate (nightly only):
-```rust
+```rust ,no_run
 #![feature(test)]
 extern crate test;
 use test::Bencher;
@@ -109,7 +109,7 @@ cargo bench
 Integration tests are placed in the `tests/` directory and test the external interface of the library.
 
 ### Example `tests/integration_test.rs`:
-```rust
+```rust ,no_run
 use my_crate::add;
 
 #[test]
@@ -125,7 +125,7 @@ fn test_add() {
 For projects that generate a binary, you can test the executable by running it as a subprocess and checking its output.
 
 ### Example `tests/test_binary.rs`:
-```rust
+```rust ,no_run
 use std::process::Command;
 
 #[test]
